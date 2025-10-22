@@ -9,13 +9,14 @@ try:
     from reportlab.pdfgen import canvas
     from reportlab.pdfbase import pdfmetrics
     from reportlab.pdfbase.ttfonts import TTFont
-    FONT_PATH = "C:\\Windows\\Fonts\\DejaVuSans.ttf"
+
+    # ✅ En stabil ve Türkçe karakter desteği güçlü font: Arial
+    FONT_PATH = "C:\\Windows\\Fonts\\arial.ttf"
     if os.path.exists(FONT_PATH):
-        pdfmetrics.registerFont(TTFont("DejaVuSans", FONT_PATH))
-        PDF_FONT = "DejaVuSans"
-    else:
-        pdfmetrics.registerFont(TTFont("Arial", "C:\\Windows\\Fonts\\arial.ttf"))
+        pdfmetrics.registerFont(TTFont("Arial", FONT_PATH))
         PDF_FONT = "Arial"
+    else:
+        PDF_FONT = "Helvetica"  # Yedek
     CAN_PDF = True
 except Exception:
     CAN_PDF = False
@@ -92,7 +93,6 @@ def kaydet():
 
     tarih = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
 
-    # Eğer dosya yoksa baştan oluştur
     if not os.path.exists(yol):
         blob = (
             "\n" + "─" * 60 + "\n"
@@ -112,7 +112,6 @@ def kaydet():
             messagebox.showerror("Hata", f"Kaydedilemedi:\n{e}")
             return
     else:
-        # Dosya varsa EN ALTA ekle
         try:
             block = (
                 f"🕓 {tarih} ({dakika})\n"
@@ -126,12 +125,9 @@ def kaydet():
             messagebox.showerror("Hata", f"Dosya güncellenemedi:\n{e}")
             return
 
-    # Alanları temizle (kurs hariç)
     ders_entry.delete(0, tk.END)
     dakika_entry.delete(0, tk.END)
     not_text.delete("1.0", tk.END)
-
-    # Listeyi yenile
     listeyi_yenile()
 
 # ================= Notları Gör =================
@@ -182,13 +178,10 @@ def dersleri_goster(kurs):
         tk.Button(frame, text="🗑️", bg="#b30000", fg="#fff", bd=0,
                   font=("Segoe UI", 9, "bold"),
                   command=lambda d=dosya, k=kurs: dosya_sil(k, d)).pack(side="right", padx=4)
-        # 🔹 PDF’e dönüştür butonu eklendi
         if CAN_PDF:
             tk.Button(tab_notlar, text="📘 PDF'e Dönüştür", bg="#0078ff", fg="#fff",
                       bd=0, font=("Segoe UI", 10, "bold"),
                       command=lambda k=kurs: kursu_pdf_yap(k)).pack(pady=12)
-
-        # Geri dön butonu
         tk.Button(tab_notlar, text="⬅️ Geri Dön", bg="#404040", fg=FG, bd=0,
                   font=("Segoe UI", 10),
                   command=listeyi_yenile).pack(pady=(4, 14))
